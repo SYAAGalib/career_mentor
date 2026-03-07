@@ -15,8 +15,46 @@ class AiApiService {
 
   final String baseUrl;
   final http.Client _client;
+  String? _authToken;
 
   Uri _uri(String path) => Uri.parse('$baseUrl$path');
+
+  void setAuthToken(String? token) {
+    _authToken = token;
+  }
+
+  Map<String, String> _headers({bool json = true}) {
+    return {
+      if (json) 'content-type': 'application/json',
+      if (_authToken != null && _authToken!.isNotEmpty)
+        'authorization': 'Bearer $_authToken',
+    };
+  }
+
+  Future<Map<String, dynamic>> authenticateGuest({
+    required String userId,
+    String role = 'learner',
+  }) async {
+    final response = await _client.post(
+      _uri('/auth/guest'),
+      headers: {'content-type': 'application/json'},
+      body: jsonEncode({
+        'user_id': userId,
+        'role': role,
+      }),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Guest auth API failed: ${response.statusCode}');
+    }
+
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic>) {
+      throw Exception('Invalid guest auth response');
+    }
+    _authToken = decoded['access_token']?.toString();
+    return decoded;
+  }
 
   Future<Map<String, dynamic>> generateRoadmap({
     required String userId,
@@ -26,7 +64,7 @@ class AiApiService {
   }) async {
     final response = await _client.post(
       _uri('/roadmap/generate'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
       body: jsonEncode({
         'user_id': userId,
         'career_goal': careerGoal,
@@ -53,7 +91,7 @@ class AiApiService {
   }) async {
     final response = await _client.post(
       _uri('/validation/quiz'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
       body: jsonEncode({
         'user_id': userId,
         'topic_id': topicId,
@@ -75,7 +113,7 @@ class AiApiService {
   Future<Map<String, dynamic>> generateQuiz({required String topicId}) async {
     final response = await _client.get(
       _uri('/validation/generate?topic_id=$topicId'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -97,7 +135,7 @@ class AiApiService {
   }) async {
     final response = await _client.post(
       _uri('/mentor/reply'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
       body: jsonEncode({
         'user_id': userId,
         'persona': persona,
@@ -124,7 +162,7 @@ class AiApiService {
   }) async {
     final response = await _client.post(
       _uri('/progress/update'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
       body: jsonEncode({
         'user_id': userId,
         'topic_id': topicId,
@@ -150,7 +188,7 @@ class AiApiService {
   }) async {
     final response = await _client.post(
       _uri('/resume/build'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
       body: jsonEncode({
         'user_id': userId,
         'target_role': targetRole,
@@ -172,7 +210,7 @@ class AiApiService {
   Future<List<Map<String, dynamic>>> leaderboard({int limit = 10}) async {
     final response = await _client.get(
       _uri('/progress/leaderboard?limit=$limit'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -195,7 +233,7 @@ class AiApiService {
   Future<List<String>> bangladeshSpotlight() async {
     final response = await _client.get(
       _uri('/content/spotlight'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -215,7 +253,7 @@ class AiApiService {
     final encoded = Uri.encodeQueryComponent(careerPath);
     final response = await _client.get(
       _uri('/content/simulations?career_path=$encoded'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -238,7 +276,7 @@ class AiApiService {
   }) async {
     final response = await _client.post(
       _uri('/exams/submit'),
-      headers: {'content-type': 'application/json'},
+      headers: _headers(),
       body: jsonEncode({
         'user_id': userId,
         'section': section,

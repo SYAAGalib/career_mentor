@@ -274,6 +274,10 @@ class CareerAiController extends Notifier<CareerAiState> {
 
   @override
   CareerAiState build() {
+    final savedToken = _storage.getAiBackendToken();
+    if (savedToken != null && savedToken.isNotEmpty) {
+      _api.setAuthToken(savedToken);
+    }
     final saved = _storage.getAiState();
     if (saved == null) return CareerAiState.initial();
     return CareerAiState.fromMap(saved);
@@ -283,9 +287,25 @@ class CareerAiController extends Notifier<CareerAiState> {
     await _storage.setAiState(state.toMap());
   }
 
+  Future<void> _ensureBackendAuth() async {
+    final existing = _storage.getAiBackendToken();
+    if (existing != null && existing.isNotEmpty) {
+      _api.setAuthToken(existing);
+      return;
+    }
+
+    final auth = await _api.authenticateGuest(userId: _userId);
+    final token = auth['access_token']?.toString();
+    if (token != null && token.isNotEmpty) {
+      await _storage.setAiBackendToken(token);
+      _api.setAuthToken(token);
+    }
+  }
+
   Future<void> initializeRoadmapFromOnboarding(OnboardingAnswers answers) async {
     if (state.topics.isNotEmpty) return;
     try {
+      await _ensureBackendAuth();
       final response = await _api.generateRoadmap(
         userId: _userId,
         careerGoal: answers.goal,
@@ -479,6 +499,7 @@ class CareerAiController extends Notifier<CareerAiState> {
     bool passed = score >= 80;
 
     try {
+      await _ensureBackendAuth();
       final response = await _api.validateQuiz(
         userId: _userId,
         topicId: topicId,
@@ -524,6 +545,7 @@ class CareerAiController extends Notifier<CareerAiState> {
     );
 
     try {
+      await _ensureBackendAuth();
       await _api.updateProgress(
         userId: _userId,
         topicId: topicId,
@@ -588,6 +610,7 @@ class CareerAiController extends Notifier<CareerAiState> {
   Future<void> refreshMentorMessage() async {
     final local = generateMentorTip();
     try {
+      await _ensureBackendAuth();
       final response = await _api.mentorReply(
         userId: _userId,
         persona: state.persona.name,
@@ -636,6 +659,7 @@ class CareerAiController extends Notifier<CareerAiState> {
   Future<void> refreshResumePreview() async {
     final local = generateResumePreview();
     try {
+      await _ensureBackendAuth();
       final response = await _api.buildResume(
         userId: _userId,
         targetRole: state.selectedCareerPath ?? 'Career Track',
@@ -653,6 +677,7 @@ class CareerAiController extends Notifier<CareerAiState> {
 
   Future<void> generateQuizForTopic(String topicId) async {
     try {
+      await _ensureBackendAuth();
       final response = await _api.generateQuiz(topicId: topicId);
       final rawQuestions = response['questions'];
       final list = <String>[];
@@ -678,6 +703,7 @@ class CareerAiController extends Notifier<CareerAiState> {
 
   Future<void> submitSectionExam(String section, int score) async {
     try {
+      await _ensureBackendAuth();
       final response = await _api.submitSectionExam(
         userId: _userId,
         section: section,
@@ -715,5 +741,32 @@ class CareerAiController extends Notifier<CareerAiState> {
       'Simulation: Prioritize tasks under deadline pressure',
       'Simulation: Present your solution to a hiring panel',
     ];
+  }
+
+  Future<List<Map<String, dynamic>>> getLeaderboard({int limit = 5}) async {
+    try {
+      await _ensureBackendAuth();
+      return await _api.leaderboard(limit: limit);
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<List<String>> getSpotlight() async {
+    try {
+      await _ensureBackendAuth();
+      return await _api.bangladeshSpotlight();
+    } catch (_) {
+      return localBangladeshSpotlight();
+    }
+  }
+
+  Future<List<String>> getSimulations() async {
+    try {
+      await _ensureBackendAuth();
+      return await _api.simulations(state.selectedCareerPath ?? 'General Career');
+    } catch (_) {
+      return careerSimulations();
+    }
   }
 }

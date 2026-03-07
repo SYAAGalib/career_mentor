@@ -11,6 +11,20 @@ class _FakeApi extends AiApiService {
   _FakeApi() : super(baseUrl: 'http://localhost');
 
   @override
+  Future<Map<String, dynamic>> authenticateGuest({
+    required String userId,
+    String role = 'learner',
+  }) async {
+    setAuthToken('fake-token');
+    return {
+      'access_token': 'fake-token',
+      'token_type': 'bearer',
+      'user_id': userId,
+      'role': role,
+    };
+  }
+
+  @override
   Future<Map<String, dynamic>> generateRoadmap({
     required String userId,
     required String careerGoal,

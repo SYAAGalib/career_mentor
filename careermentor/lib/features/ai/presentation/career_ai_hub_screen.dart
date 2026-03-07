@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/services/analytics_service.dart';
 import '../../../features/onboarding/state/onboarding_controller.dart';
-import '../data/ai_api_service.dart';
 import '../state/career_ai_controller.dart';
 
 class CareerAiHubScreen extends ConsumerStatefulWidget {
@@ -497,8 +496,7 @@ class _CommunityTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(careerAiControllerProvider);
-    final api = ref.read(aiApiServiceProvider);
+    ref.watch(careerAiControllerProvider);
     final controller = ref.read(careerAiControllerProvider.notifier);
 
     return Padding(
@@ -508,7 +506,7 @@ class _CommunityTab extends ConsumerWidget {
           const Text('Peer Progress Wall', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           FutureBuilder<List<Map<String, dynamic>>>(
-            future: api.leaderboard(limit: 5),
+            future: controller.getLeaderboard(limit: 5),
             builder: (context, snapshot) {
               final fallback = const [
                 ('Anonymous Learner A', 91),
@@ -553,7 +551,7 @@ class _CommunityTab extends ConsumerWidget {
           const Text('Bangladesh Career Spotlight', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           FutureBuilder<List<String>>(
-            future: api.bangladeshSpotlight(),
+            future: controller.getSpotlight(),
             builder: (context, snapshot) {
               final items = snapshot.data?.isNotEmpty == true
                   ? snapshot.data!
@@ -576,7 +574,7 @@ class _CommunityTab extends ConsumerWidget {
           const Text('Real-world Simulations', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           FutureBuilder<List<String>>(
-            future: api.simulations(state.selectedCareerPath ?? 'General Career'),
+            future: controller.getSimulations(),
             builder: (context, snapshot) {
               final items = snapshot.data?.isNotEmpty == true
                   ? snapshot.data!

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import uuid
 
@@ -27,7 +27,7 @@ class AuthService:
         payload = {
             "sub": user_id,
             "role": role,
-            "exp": datetime.utcnow() + timedelta(hours=24),
+            "exp": datetime.now(timezone.utc) + timedelta(hours=24),
         }
         return jwt.encode(payload, self._secret, algorithm=self._algo)
 
@@ -68,3 +68,10 @@ class AuthService:
                 user_id=account.user_id,
                 role=account.role,
             )
+
+    def issue_guest_token(self, user_id: str, role: str = "learner") -> AuthResponse:
+        return AuthResponse(
+            access_token=self._token(user_id, role),
+            user_id=user_id,
+            role=role,
+        )

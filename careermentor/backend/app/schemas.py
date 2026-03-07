@@ -118,6 +118,11 @@ class AuthResponse(BaseModel):
     role: str
 
 
+class GuestAuthRequest(BaseModel):
+    user_id: str
+    role: str = "learner"
+
+
 class ExamSubmitRequest(BaseModel):
     user_id: str
     section: str

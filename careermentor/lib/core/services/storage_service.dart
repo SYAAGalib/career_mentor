@@ -22,6 +22,7 @@ class StorageService {
   static const String keyThemeMode = 'theme_mode';
   static const String keyAiApiKey = 'ai_api_key';
   static const String keyAiState = 'ai_state';
+  static const String keyAiBackendToken = 'ai_backend_token';
 
   // Agreement
   Future<void> setAgreementAccepted(String version) async {
@@ -135,6 +136,18 @@ class StorageService {
 
   String? getAiApiKey() {
     return _prefs.getString(keyAiApiKey);
+  }
+
+  Future<void> setAiBackendToken(String token) async {
+    await _prefs.setString(keyAiBackendToken, token);
+  }
+
+  String? getAiBackendToken() {
+    return _prefs.getString(keyAiBackendToken);
+  }
+
+  Future<void> clearAiBackendToken() async {
+    await _prefs.remove(keyAiBackendToken);
   }
 
   // Career AI state

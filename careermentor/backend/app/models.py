@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .db import Base
 
@@ -39,5 +39,9 @@ class SectionExamAttempt(Base):
     section = Column(String(120), index=True, nullable=False)
     score = Column(Integer, nullable=False)
     passed = Column(Boolean, default=False)
-    attempted_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    attempted_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
     cooldown_until = Column(DateTime, nullable=True)

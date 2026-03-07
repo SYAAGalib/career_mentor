@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 
 from ..db import SessionLocal
@@ -11,7 +11,7 @@ class ExamService:
     COOLDOWN_DAYS = 3
 
     def submit(self, req: ExamSubmitRequest) -> ExamSubmitResponse:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
         with SessionLocal() as db:
             latest = db.execute(
                 select(SectionExamAttempt)
