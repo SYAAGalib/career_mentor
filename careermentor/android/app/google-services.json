@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1005282274454",
+    "project_id": "career-mentor-ai-2026",
+    "storage_bucket": "career-mentor-ai-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1005282274454:android:0507fc0ae2b6dcefefe6b7",
+        "android_client_info": {
+          "package_name": "com.example.careermentor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_eBBEkt9hSFQQqlC9hfl6uqyhmfatyc8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

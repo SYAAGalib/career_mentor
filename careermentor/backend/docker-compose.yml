@@ -1,0 +1,29 @@
+services:
+  api:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://careermentor:careermentor@db:5432/careermentor
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: careermentor
+      POSTGRES_USER: careermentor
+      POSTGRES_PASSWORD: careermentor
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"

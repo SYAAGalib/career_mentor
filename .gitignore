@@ -1,0 +1,5 @@
+# Ignore local/editor folders
+.marscode/
+
+# Ignore spec doc (has spaces in name)
+CareerMentor\ AI\ Full-specification-and-plan.md
