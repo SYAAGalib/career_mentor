@@ -1,0 +1,4 @@
+project_id = "cltifbrfpydkvvxbbalf"
+
+[functions.ai-career-mentor]
+verify_jwt = false
